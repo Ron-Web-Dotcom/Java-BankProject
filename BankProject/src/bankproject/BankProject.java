@@ -15,32 +15,31 @@ public class BankProject {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-      String name;
-        int acc_num, old_bal, new_bal, mon_dep, mon_wit, serv_min;
-        
+        String name;
+        int acc_num;
+        double old_bal, new_bal, mon_dep, mon_wit;
+
         Scanner input = new Scanner(System.in);
         System.out.println("Please Enter your name");
         name = input.nextLine();
         System.out.println("Please Enter your Account Number");
         acc_num = input.nextInt();
         System.out.println("Please Enter your Old Balance: $");
-        old_bal = input.nextInt();
+        old_bal = input.nextDouble();
         System.out.println("Please Enter your Deposit Amount: $");
-        mon_dep = input.nextInt();
+        mon_dep = input.nextDouble();
         System.out.println("Please Enter your Withdrawl Amount: $");
-        mon_wit = input.nextInt();
+        mon_wit = input.nextDouble();
         new_bal = (old_bal + mon_dep) - mon_wit;
-        
+
         System.out.println(name + ", your account number is " + acc_num);
         System.out.println("Your old balance was: $" + old_bal + ", you deposited $" + mon_dep + " this month and withdrew $" + mon_wit + ".");
-        
+
         if (new_bal < 1000){
-            serv_min = new_bal - 50;
-            System.out.println("Your new balance is: $" + serv_min);
+            new_bal = new_bal - 50;
+            System.out.println("A $50 service charge has been applied.");
         }
-        else{
-            System.out.println("Your new balance is: $" + new_bal);
-        }
+        System.out.println("Your new balance is: $" + new_bal);
     }
     
 }
