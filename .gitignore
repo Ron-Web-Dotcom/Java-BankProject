@@ -1,0 +1,6 @@
+# Build output
+BankProject/build/
+BankProject/dist/
+
+# IDE private/machine-specific settings
+BankProject/nbproject/private/
