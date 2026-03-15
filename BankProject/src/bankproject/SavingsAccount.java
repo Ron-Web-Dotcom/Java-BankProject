@@ -2,11 +2,16 @@ package bankproject;
 
 public class SavingsAccount extends Account {
 
-    private static final double ANNUAL_INTEREST_RATE  = 0.04; // 4% per year
+    private static final double ANNUAL_INTEREST_RATE  = 0.04;
     private static final double MONTHLY_INTEREST_RATE = ANNUAL_INTEREST_RATE / 12.0;
 
     public SavingsAccount(String ownerName, int accountNumber, double initialBalance) {
         super(ownerName, accountNumber, initialBalance);
+    }
+
+    /** Loading constructor — restores from file without adding an opening transaction. */
+    SavingsAccount(String ownerName, int accountNumber, double balance, boolean loading) {
+        super(ownerName, accountNumber, balance, loading);
     }
 
     @Override

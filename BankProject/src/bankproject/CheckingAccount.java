@@ -9,6 +9,11 @@ public class CheckingAccount extends Account {
         super(ownerName, accountNumber, initialBalance);
     }
 
+    /** Loading constructor — restores from file without adding an opening transaction. */
+    CheckingAccount(String ownerName, int accountNumber, double balance, boolean loading) {
+        super(ownerName, accountNumber, balance, loading);
+    }
+
     @Override
     public void applyMonthlyFees() {
         if (balance < MINIMUM_BALANCE) {

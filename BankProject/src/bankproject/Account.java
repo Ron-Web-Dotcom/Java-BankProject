@@ -10,6 +10,7 @@ public abstract class Account {
     protected double balance;
     protected final List<Transaction> history = new ArrayList<>();
 
+    /** Used when opening a brand-new account — records the opening deposit. */
     public Account(String ownerName, int accountNumber, double initialBalance) {
         this.ownerName = ownerName;
         this.accountNumber = accountNumber;
@@ -17,6 +18,13 @@ public abstract class Account {
         if (initialBalance > 0) {
             history.add(new Transaction(Transaction.Type.DEPOSIT, initialBalance, balance));
         }
+    }
+
+    /** Used when loading an existing account from file — does NOT add an initial transaction. */
+    protected Account(String ownerName, int accountNumber, double balance, boolean loading) {
+        this.ownerName = ownerName;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
     }
 
     public boolean deposit(double amount) {
@@ -33,12 +41,38 @@ public abstract class Account {
         return true;
     }
 
-    /**
-     * Applies monthly fees or interest specific to the account type.
-     */
+    /** Applies monthly fees or interest specific to the account type. */
     public abstract void applyMonthlyFees();
 
     public abstract String getAccountType();
+
+    // -------------------------------------------------------------------------
+    // File persistence
+    // -------------------------------------------------------------------------
+
+    /** Serialize this account's header line for accounts.dat */
+    public String toFileLine() {
+        return String.format("ACCOUNT|%s|%s|%d|%.2f",
+                getAccountType().toUpperCase(), ownerName, accountNumber, balance);
+    }
+
+    /** Serialize all transactions to file lines. */
+    public List<String> transactionFileLines() {
+        List<String> lines = new ArrayList<>();
+        for (Transaction tx : history) {
+            lines.add(tx.toFileLine());
+        }
+        return lines;
+    }
+
+    /** Add a transaction loaded from file (bypasses balance mutation). */
+    public void addHistoricalTransaction(Transaction tx) {
+        history.add(tx);
+    }
+
+    // -------------------------------------------------------------------------
+    // Display
+    // -------------------------------------------------------------------------
 
     public void printStatement() {
         System.out.println("\n========================================");
@@ -59,7 +93,7 @@ public abstract class Account {
         System.out.println("========================================\n");
     }
 
-    public double getBalance()      { return balance; }
-    public String getOwnerName()    { return ownerName; }
-    public int getAccountNumber()   { return accountNumber; }
+    public double getBalance()    { return balance; }
+    public String getOwnerName()  { return ownerName; }
+    public int getAccountNumber() { return accountNumber; }
 }
