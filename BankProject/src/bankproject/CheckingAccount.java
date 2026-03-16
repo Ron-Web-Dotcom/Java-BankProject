@@ -22,7 +22,7 @@ public class CheckingAccount extends Account {
             System.out.printf("Service charge applied: -$%.2f  (balance was below $%.2f minimum)%n",
                     SERVICE_CHARGE, MINIMUM_BALANCE);
         } else {
-            System.out.println("No service charge this month — balance is above the minimum.");
+            System.out.println("No service charge this month - balance is above the minimum.");
         }
         System.out.printf("Balance after monthly review: $%.2f%n", balance);
     }
