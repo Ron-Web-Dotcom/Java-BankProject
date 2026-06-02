@@ -7,10 +7,36 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
+ * Entry point and console UI for Ron's Bank.
+ *
+ * <p>Provides a two-level interactive menu driven entirely from standard input:
+ * <ol>
+ *   <li><b>Main menu</b> — list all accounts, open a new account, or exit.</li>
+ *   <li><b>Account menu</b> — deposit, withdraw, transfer, apply monthly
+ *       fees/interest, view full statement, or check balance.</li>
+ * </ol>
+ *
+ * <p><b>Startup:</b> Existing accounts are loaded from {@code accounts.dat}
+ * before the first prompt is shown (if the file exists).
+ *
+ * <p><b>Shutdown:</b> All accounts and transaction histories are saved back to
+ * {@code accounts.dat} automatically when the user selects Exit, so no data
+ * is lost between sessions.
+ *
+ * <p><b>Error handling:</b> Every numeric input field is wrapped in an
+ * {@link InputMismatchException} guard; bad input returns the user to the
+ * current menu rather than crashing.
+ *
  * @author RON TAYLOR
  */
 public class BankProject {
 
+    /**
+     * Application entry point. Loads persisted data, runs the interactive
+     * menu loop, then saves all accounts on exit.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         Bank bank = new Bank();
         try {
@@ -20,7 +46,7 @@ public class BankProject {
                 System.out.printf("Loaded %d account%s from file.%n", loaded, loaded == 1 ? "" : "s");
             }
         } catch (IOException e) {
-            System.out.println("Note: Could not read saved data — starting fresh.");
+            System.out.println("Note: Could not read saved data - starting fresh.");
         }
 
         try (Scanner input = new Scanner(System.in)) {
@@ -69,7 +95,7 @@ public class BankProject {
             bank.save();
             System.out.println("\nAccounts saved. Goodbye!");
         } catch (IOException e) {
-            System.out.println("\nWarning: Could not save account data — " + e.getMessage());
+            System.out.println("\nWarning: Could not save account data - " + e.getMessage());
         }
     }
 
@@ -77,6 +103,11 @@ public class BankProject {
     // Main menu
     // -------------------------------------------------------------------------
 
+    /**
+     * Prints the top-level menu, showing how many accounts are on file.
+     *
+     * @param bank the bank whose account count is shown in the header
+     */
     private static void printMainMenu(Bank bank) {
         int count = bank.getAccounts().size();
         System.out.printf("%n=== Ron's Bank  |  %d account%s on file ===%n",
@@ -90,6 +121,13 @@ public class BankProject {
     // Account selection
     // -------------------------------------------------------------------------
 
+    /**
+     * Lists all accounts with index numbers and prompts the user to pick one,
+     * then delegates to {@link #manageAccount}.
+     *
+     * @param input the active Scanner for reading user input
+     * @param bank  the bank registry to retrieve accounts from
+     */
     private static void selectAndManageAccount(Scanner input, Bank bank) {
         List<Account> accounts = bank.getAccounts();
         if (accounts.isEmpty()) {
@@ -132,6 +170,16 @@ public class BankProject {
     // Per-account menu
     // -------------------------------------------------------------------------
 
+    /**
+     * Runs the per-account action loop until the user chooses to go back.
+     *
+     * <p>Available actions: Deposit, Withdraw, Transfer, Apply Monthly
+     * Fees/Interest, View Statement, Check Balance, Back.
+     *
+     * @param input   the active Scanner for reading user input
+     * @param bank    the bank registry (needed for transfer target lookup)
+     * @param account the account to operate on
+     */
     private static void manageAccount(Scanner input, Bank bank, Account account) {
         boolean running = true;
         while (running) {
@@ -182,6 +230,16 @@ public class BankProject {
     // Account creation
     // -------------------------------------------------------------------------
 
+    /**
+     * Guides the user through the account-opening wizard.
+     *
+     * <p>Validated fields: non-blank name, numeric and unique account number,
+     * account type 1 or 2, non-negative opening balance.
+     *
+     * @param input the active Scanner for reading user input
+     * @param bank  the registry used to check for duplicate account numbers
+     * @return the new Account, or {@code null} if any validation step fails
+     */
     private static Account createAccount(Scanner input, Bank bank) {
         System.out.print("\nEnter your name: ");
         String name = input.nextLine().trim();
@@ -239,7 +297,7 @@ public class BankProject {
 
         if (type == 1) return new CheckingAccount(name, accNum, initialBalance);
         if (type == 2) return new SavingsAccount(name, accNum, initialBalance);
-        System.out.println("Unknown type — defaulting to Checking.");
+        System.out.println("Unknown type - defaulting to Checking.");
         return new CheckingAccount(name, accNum, initialBalance);
     }
 
@@ -247,6 +305,13 @@ public class BankProject {
     // Transaction handlers
     // -------------------------------------------------------------------------
 
+    /**
+     * Prompts for a deposit amount, applies it to the account, and prints a
+     * confirmation or error message.
+     *
+     * @param input   the active Scanner for reading user input
+     * @param account the account to credit
+     */
     private static void handleDeposit(Scanner input, Account account) {
         try {
             System.out.print("Deposit amount: $");
@@ -264,6 +329,13 @@ public class BankProject {
         }
     }
 
+    /**
+     * Prompts for a withdrawal amount and debits the account. Guards against
+     * zero/negative amounts and insufficient funds.
+     *
+     * @param input   the active Scanner for reading user input
+     * @param account the account to debit
+     */
     private static void handleWithdrawal(Scanner input, Account account) {
         try {
             System.out.print("Withdrawal amount: $");
@@ -285,6 +357,17 @@ public class BankProject {
         }
     }
 
+    /**
+     * Lists all accounts other than {@code from} as transfer targets and
+     * executes the transfer via {@link Bank#transfer}.
+     *
+     * <p>The transfer is recorded as a WITHDRAWAL on the source account and
+     * a DEPOSIT on the destination account.
+     *
+     * @param input the active Scanner for reading user input
+     * @param bank  the registry used to discover transfer target accounts
+     * @param from  the source account to transfer funds out of
+     */
     private static void handleTransfer(Scanner input, Bank bank, Account from) {
         List<Account> targets = new ArrayList<>();
         for (Account a : bank.getAccounts()) {
